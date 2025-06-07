@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polkanomics Assistant</title>
+    <link rel="icon" type="image/svg+xml" href="mark-polkadot.svg">
+    <style>
+        :root {
+            --polkadot-primary: #E6007A;
+            --polkadot-secondary: #6F36DC;
+            --polkadot-background: #1A1A1A;
+            --polkadot-text: #FFFFFF;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--polkadot-background);
+            color: var(--polkadot-text);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header img {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 1rem;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .message {
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            max-width: 80%;
+        }
+
+        .user-message {
+            background-color: rgba(230, 0, 122, 0.1);
+            align-self: flex-end;
+        }
+
+        .assistant-message {
+            background-color: rgba(111, 54, 220, 0.1);
+            align-self: flex-start;
+        }
+
+        .input-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background-color: var(--polkadot-background);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid var(--polkadot-primary);
+            border-radius: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--polkadot-text);
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            background-color: var(--polkadot-primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--polkadot-secondary);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .tips {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="mark-polkadot.svg" alt="Polkadot Logo">
+            <h1>Polkanomics Assistant</h1>
+            <p>Your AI-powered economic analysis assistant</p>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <!-- Messages will be added here -->
+        </div>
+
+        <div class="loading" id="loading">
+            Thinking...
+        </div>
+
+        <div class="tips">
+            <h3>💡 Tips for better responses</h3>
+            <ul>
+                <li>Be specific in your questions</li>
+                <li>Provide context when needed</li>
+                <li>Ask follow-up questions for clarification</li>
+                <li>Use economic terminology when possible</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="input-container">
+        <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="Ask your economic question..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000/chat'; // Local development server
+
+        function addMessage(content, role) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+            messageDiv.innerHTML = `<strong>${role}:</strong><br>${content}`;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message }),
+                });
+
+                const data = await response.json();
+                
+                // Add assistant message
+                addMessage(data.response, 'assistant');
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+            } finally {
+                // Hide loading
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html> 
