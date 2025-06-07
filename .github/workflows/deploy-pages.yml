@@ -17,17 +17,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
       - name: Copy static site to deployment folder
         run: |
+          rm -rf public
           mkdir public
           cp -r static/* public/
+          touch public/.nojekyll
+          echo "Files in public directory:"
           ls -la public/
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: gh-pages
-          commit_message: "Deploy to GitHub Pages"
-          force_orphan: true 
+          path: './public'
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4 
