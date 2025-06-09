@@ -2,6 +2,7 @@ import { ChatMessage, ChatResponse } from '../types/chat';
 import { SYSTEM_PROMPT } from '../constants/prompts';
 
 const API_URL = 'http://localhost:11434/api/generate';
+const MAX_HISTORY_LENGTH = 20; // Keep last 20 messages for context
 
 // Store conversation history
 let conversationHistory: ChatMessage[] = [];
@@ -10,6 +11,11 @@ export const sendMessage = async (message: string): Promise<ChatResponse> => {
   // Add user message to history
   const userMessage = createUserMessage(message);
   conversationHistory.push(userMessage);
+
+  // Trim history if it exceeds max length
+  if (conversationHistory.length > MAX_HISTORY_LENGTH) {
+    conversationHistory = conversationHistory.slice(-MAX_HISTORY_LENGTH);
+  }
 
   // Prepare the full prompt with system message and conversation history
   const fullPrompt = [
@@ -27,6 +33,14 @@ export const sendMessage = async (message: string): Promise<ChatResponse> => {
       model: 'mistral',
       prompt: fullPrompt,
       stream: false,
+      options: {
+        temperature: 0.7,
+        top_p: 0.95,
+        top_k: 40,
+        num_ctx: 4096, // Increased context window
+        repeat_penalty: 1.1,
+        stop: ['user:', 'assistant:'], // Stop tokens to prevent model from continuing the conversation
+      },
     }),
   });
 
@@ -63,4 +77,8 @@ export const createErrorMessage = (): ChatMessage => ({
 
 export const clearConversationHistory = () => {
   conversationHistory = [];
+};
+
+export const getConversationHistory = (): ChatMessage[] => {
+  return [...conversationHistory];
 }; 
