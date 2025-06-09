@@ -1,0 +1,25 @@
+langchain>=0.1.0
+openai>=1.0.0
+python-dotenv>=1.0.0
+<<<<<<< HEAD
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.2
+python-multipart>=0.0.6
+tiktoken>=0.5.1
+transformers==4.35.2
+datasets>=2.16.0
+torch==2.1.1
+=======
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.4.2
+python-multipart>=0.0.6
+tiktoken>=0.5.1
+transformers>=4.37.0
+datasets>=2.16.0
+torch>=2.2.0
+>>>>>>> 8ae7704bd8ca00e14c53417f2fa148c6d4607468
+accelerate>=0.27.0
+peft>=0.7.0
+bitsandbytes>=0.41.0 
