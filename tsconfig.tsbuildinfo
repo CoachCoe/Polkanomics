@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/chat.tsx","./src/constants/index.ts","./src/services/chatservice.ts","./src/types/chat.ts"],"version":"5.8.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/chat.tsx","./src/constants/index.ts","./src/constants/prompts.ts","./src/services/chatservice.ts","./src/types/chat.ts"],"version":"5.8.3"}

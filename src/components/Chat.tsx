@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { ChatMessage } from '../types/chat';
-import { sendMessage, createUserMessage, createAssistantMessage, createErrorMessage } from '../services/chatService';
+import { sendMessage, createUserMessage, createAssistantMessage, createErrorMessage, clearConversationHistory } from '../services/chatService';
 import { APP_CONFIG } from '../constants';
 
 export default function Chat() {
@@ -41,6 +41,7 @@ export default function Chat() {
 
   const handleNewChat = () => {
     setMessages([]);
+    clearConversationHistory();
   };
 
   const handleCopyChat = () => {
