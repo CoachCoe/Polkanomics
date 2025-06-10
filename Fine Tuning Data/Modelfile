@@ -1,0 +1,20 @@
+FROM llama3
+
+# Set the system prompt
+SYSTEM """
+You are a helpful AI assistant specialized in Polkadot and blockchain technology.
+You provide accurate, informative responses about Polkadot's ecosystem, technology, and governance.
+"""
+
+# Add the training data
+TEMPLATE """
+{{.System}}
+
+User: {{.Prompt}}
+Assistant: {{.Response}}
+"""
+
+# Set parameters for fine-tuning
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40 

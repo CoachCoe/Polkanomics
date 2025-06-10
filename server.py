@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
+import requests
 import uvicorn
 
 app = FastAPI()
@@ -16,17 +15,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model and tokenizer
-model = AutoModelForCausalLM.from_pretrained(
-    "fine_tuned_model",
-    torch_dtype=torch.float32,
-    device_map="auto",
-    low_cpu_mem_usage=True
-)
-tokenizer = AutoTokenizer.from_pretrained("fine_tuned_model")
-
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
+# Ollama API configuration
+OLLAMA_API_URL = "http://localhost:11434/api/generate"
+MODEL_NAME = "polkadot-assistant"
 
 class ChatRequest(BaseModel):
     message: str
@@ -34,31 +25,26 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat(request: ChatRequest):
     try:
-        # Format the prompt
-        formatted_prompt = f"instruction: {request.message}\ninput: "
+        # Prepare the request to Ollama
+        ollama_request = {
+            "model": MODEL_NAME,
+            "prompt": request.message,
+            "stream": False,
+            "options": {
+                "temperature": 0.7,
+                "top_p": 0.9,
+                "top_k": 40
+            }
+        }
         
-        # Tokenize the input
-        inputs = tokenizer(formatted_prompt, return_tensors="pt", padding=True)
-        inputs = {k: v.to(model.device) for k, v in inputs.items()}
+        # Send request to Ollama
+        response = requests.post(OLLAMA_API_URL, json=ollama_request)
+        response.raise_for_status()
         
-        # Generate response
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs,
-                max_new_tokens=512,
-                num_return_sequences=1,
-                temperature=0.7,
-                top_p=0.9,
-                do_sample=True,
-                pad_token_id=tokenizer.eos_token_id,
-                use_cache=True
-            )
+        # Extract and return the response
+        result = response.json()
+        return {"response": result["response"]}
         
-        # Decode and return the response
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        response = response[len(formatted_prompt):].strip()
-        
-        return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
